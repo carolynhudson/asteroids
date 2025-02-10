@@ -14,7 +14,7 @@ class Player(CircleShape):
         #self.gun_sound = pygame.mixer.Sound(file=SOUND_GUN)
         #self.thrust_sound = pygame.mixer.Sound(file=SOUND_THRUST)
         
-
+    # Old polygon design
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
