@@ -8,8 +8,8 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.gun_cooldown = 0
-        self.ship_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in [(0,1), (0.5714, -0.7143), (0.2857, -0.4286), (-0.2857, -0.4286), (-0.5714, -0.7143)]]
-        self.thrust_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in [(0.2857, -0.4286), (-0.2857, -0.4286), (0.0, -0.8)]]
+        self.ship_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in PLAYER_SHIP_POLYGON]
+        self.thrust_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in PLAYER_THRUST_POLYGON]
         self.moved = False
         #self.gun_sound = pygame.mixer.Sound(file=SOUND_GUN)
         #self.thrust_sound = pygame.mixer.Sound(file=SOUND_THRUST)
@@ -69,7 +69,7 @@ class Player(CircleShape):
         self.position += self.velocity * dt
         self.position.x = (self.position.x + SCREEN_WIDTH * 4) % SCREEN_WIDTH
         self.position.y = (self.position.y + SCREEN_HEIGHT * 4) % SCREEN_HEIGHT
-        
+
         return super().update(dt)
     
     def shoot(self):

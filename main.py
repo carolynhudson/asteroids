@@ -6,6 +6,7 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
 from particle import Particle
+from vectortext import VectorText
 
 def main():
     print("Starting asteroids!")
@@ -30,9 +31,12 @@ def main():
     AsteroidField.containers = (updatable)
     Shot.containers = (updatable, drawable, shots)
     Particle.containers = (updatable, drawable)
+    VectorText.containers = (updatable, drawable)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
+    score_text = VectorText(30, 30, f"SCORE {score}", 7, pygame.Color(200, 220, 255, 180))
+
 
     #Game Loop
     while True:
@@ -40,7 +44,9 @@ def main():
             if event.type == pygame.QUIT:
                 return
             
+        score_text.update_text(f"SCORE {score}")    
         updatable.update(dt)
+
         if any([a.touching(player) for a in asteroids]):
             print("Game over!")
             print(f"Your score is: {score}")
