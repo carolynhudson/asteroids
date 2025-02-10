@@ -1,9 +1,11 @@
 import pygame
+import random
 from constants import *
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+from particle import Particle
 
 def main():
     print("Starting asteroids!")
@@ -11,9 +13,12 @@ def main():
     print(f"Screen height: {SCREEN_HEIGHT}")
 
     pygame.init()
+    #pygame.mixer.init()
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     dt = 0
+    score = 0
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -24,6 +29,7 @@ def main():
     Asteroid.containers = (updatable, drawable, asteroids)
     AsteroidField.containers = (updatable)
     Shot.containers = (updatable, drawable, shots)
+    Particle.containers = (updatable, drawable)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
@@ -37,10 +43,13 @@ def main():
         updatable.update(dt)
         if any([a.touching(player) for a in asteroids]):
             print("Game over!")
+            print(f"Your score is: {score}")
             return
         
         for hit_a, hit_s in [(a, s) for a in asteroids for s in shots if a.touching(s)]:
-            hit_a.split()
+            for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
+                Particle(hit_a.position.x,hit_a.position.y)
+            score += hit_a.split(hit_s.velocity)
             hit_s.kill()
 
         screen.fill(pygame.Color(0x000000))
