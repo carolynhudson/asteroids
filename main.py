@@ -20,6 +20,7 @@ def main():
     clock = pygame.time.Clock()
     dt = 0
     score = 0
+    next_life = PLAYER_EXTRA_LIFE
     lives = PLAYER_LIVES
 
     updatable = pygame.sprite.Group()
@@ -74,7 +75,7 @@ def main():
                 # Generate a spray of temporary particles
                 for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
                     Particle(hit_a.position.x,hit_a.position.y)
-                    
+
                 # Perform split and add asteroid value to the score 
                 score += hit_a.split(hit_s.velocity)
                 shot_asteroid = True
@@ -82,7 +83,15 @@ def main():
 
             # Update score on hit
             if shot_asteroid:
-                score_text.update_text(f"SCORE {score}")    
+                score_text.update_text(f"SCORE {score}") 
+                if score >= next_life:
+                    next_life += PLAYER_EXTRA_LIFE
+                    lives += 1
+                    lives_text.update_text("^" * lives)
+
+            a_list = list(asteroids)
+            for asteroid_1, asteroid_2 in [(a_list[a1], a_list[a2]) for a1 in range(len(asteroids) - 1) for a2 in range(a1 + 1, len(asteroids)) if a_list[a1].touching(a_list[a2])]:
+                asteroid_1.collide(asteroid_2)
 
         # Clear the screen
         screen.fill(pygame.Color(0x000000))

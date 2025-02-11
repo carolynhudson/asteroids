@@ -35,3 +35,4 @@ class VectorText(pygame.sprite.Sprite):
         if not self.__generated:
             self.generate_text(self.__text, self.__scale)
         
+        
