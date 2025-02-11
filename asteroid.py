@@ -2,6 +2,7 @@ import pygame
 import random
 from constants import *
 from circleshape import *
+from randompolygon import RandomPolygon
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
@@ -12,12 +13,12 @@ class Asteroid(CircleShape):
         self.rotation_rate = random.uniform(-30,30)
 
         # make the randomized asteroid polygon from 10 to 15 vector points degrees is the base spacing +/- between 0.49 of degrees and the distance from the center 0.8 to 1.1 times the radius.
-        degrees = 360 // random.randrange(10,15)
-        self.shape = [pygame.Vector2(0,self.radius * random.uniform(0.8,1.1)).rotate(angle + random.uniform(degrees * -0.49, degrees * 0.49)) for angle in range(0, 360, degrees)]
+        self.shape = RandomPolygon(10, 15, self.radius * 0.8, self.radius * 1.1)
              
     def draw(self, screen):
         # Update the asteroid's base polygon to match the new position and rotation
-        rockpoly = [self.position + vector.rotate(self.rotation) for vector in self.shape]
+        rockpoly = self.shape.translate(self.position, self.rotation)
+        
         # Drawn the polygon
         pygame.draw.polygon(screen, pygame.Color(200, 200, 200), rockpoly, 2)
         return super().draw(screen)
