@@ -6,11 +6,14 @@ from circleshape import *
 from polygon import Polygon
 from particle import Particle
 from shot import Shot
+from audio import Audio
 
 class Saucer(CircleShape):
 
     def __init__(self, x, y, radius, player_group):
         super().__init__(x, y, radius)
+
+        self.audio = Audio()
 
         self.rotation = 0
         self.gun_cooldown = SAUCER_INITIAL_SHOOT_COOLDOWN
@@ -20,6 +23,8 @@ class Saucer(CircleShape):
 
         # make the randomized asteroid polygon from 10 to 15 vector points degrees is the base spacing +/- between 0.49 of degrees and the distance from the center 0.8 to 1.1 times the radius.
         self.shape = Polygon(SAUCER_POLYGON, radius)
+        if not self.audio.saucer_playing:
+            self.audio.start_saucer(radius == min(SAUCER_RADIUS_SIZES))
              
     def shoot(self):
         player = random.choice(list(self.player_group))
@@ -29,13 +34,14 @@ class Saucer(CircleShape):
             angle_to_player = ((player.position + player.velocity * (player_distance / SAUCER_SHOT_SPEED)) - self.position).as_polar()[1] + random.uniform(-SAUCER_SHOT_ANGLE_VARIANCE, SAUCER_SHOT_ANGLE_VARIANCE)
             new_shot = Shot(self.position, self.radius, angle_to_player, True)            
             new_shot.velocity = pygame.Vector2(1, 0).rotate(angle_to_player) * SAUCER_SHOT_SPEED #
-            #self.gun_sound.play()
+            self.audio.play_sound("shoot")
 
     def got_shot(self, shot_velocity: pygame.Vector2):
         # Generate a spray of temporary particles
         for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
             Particle(self.position.x, self.position.y, random.uniform(2.0, 10.0))
 
+        self.audio.play_sound("bang_small" if self.radius == min(SAUCER_RADIUS_SIZES) else "bang_medium")
         self.kill()
         return 1000 if self.radius == min(SAUCER_RADIUS_SIZES) else 500
 
@@ -67,3 +73,7 @@ class Saucer(CircleShape):
         self.position.y = ((self.position.y + ASTEROID_MAX_RADIUS + BOUNDRY_HEIGHT * 2) % BOUNDRY_HEIGHT) - ASTEROID_MAX_RADIUS
         return super().update(dt)
     
+    def kill(self):
+        if self.audio.saucer_playing:
+            self.audio.stop_saucer()
+        return super().kill()

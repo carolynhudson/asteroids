@@ -2,6 +2,7 @@ import pygame
 from constants import *
 from circleshape import CircleShape
 from shot import Shot
+from audio import Audio
 class Player(CircleShape):
 
     def __init__(self, x, y):
@@ -12,8 +13,7 @@ class Player(CircleShape):
         self.thrust_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS * 1.2 for x,y in PLAYER_THRUST_POLYGON]
         self.moved = False
         self.rotational_velocity = 0
-        #self.gun_sound = pygame.mixer.Sound(file=SOUND_GUN)
-        #self.thrust_sound = pygame.mixer.Sound(file=SOUND_THRUST)
+        self.audio = Audio()
         
     # Old polygon design
     def triangle(self):
@@ -42,10 +42,11 @@ class Player(CircleShape):
         self.rotational_velocity += PLAYER_TURN_SPEED * dt
     
     def move(self, dt):
-        #self.thrust_sound.play()
         self.moved = True
         self.velocity += pygame.Vector2(0, 1).rotate(self.rotation) * (PLAYER_ACCELERATION if dt > 0 else PLAYER_ACCELERATION / 2) * dt 
         self.velocity = self.velocity.clamp_magnitude(PLAYER_SPEED)
+        if not self.audio.thrust_playing:
+            self.audio.start_thrust()
         
 
     def update(self, dt):
@@ -66,6 +67,9 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE] and self.gun_cooldown <= 0:
             self.shoot()
         
+        if not self.moved and self.audio.thrust_playing:
+            self.audio.stop_thrust()
+
         self.velocity *= PLAYER_VELOCITY_DECAY
         self.rotational_velocity *= PLAYER_ROTATION_DECAY
         self.rotation += self.rotational_velocity * dt
@@ -79,5 +83,10 @@ class Player(CircleShape):
         self.gun_cooldown = PLAYER_SHOOT_COOLDOWN
         new_shot = Shot(self.position, self.radius, self.rotation, False)
         new_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
-        #self.gun_sound.play()
+        self.audio.play_sound("shoot")
+
+    def kill(self):
+        if self.audio.thrust_playing:
+            self.audio.stop_thrust()
+        return super().kill()
         

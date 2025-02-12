@@ -40,11 +40,18 @@ PARTICLE_LIFE = 1.0
 BOUNDRY_WIDTH = SCREEN_WIDTH + ASTEROID_MAX_RADIUS * 2
 BOUNDRY_HEIGHT = SCREEN_HEIGHT + ASTEROID_MAX_RADIUS * 2
 
-SOUND_GUN = "./fire.wav"
-SOUND_THRUST = "./thrust.wav"
-SOUND_SMALL_BOOM = "./bangSmall.wav"
-SOUND_MEDIUM_BOOM = "./bangMedium.wav"
-SOUND_LARGE_BOOM = "./bangLarge.wav"
+USE_AUDIO = True
+SOUND_FILES_PATH = "./sounds/"
+SOUND_FILES = [("shoot", "fire.wav"), 
+               ("thrust", "thrust.wav"), 
+               ("bang_small", "bang_small.wav"), 
+               ("bang_medium", "bang_medium.wav"), 
+               ("bang_large", "bang_large.wav"),
+               ("beat1", "beat1.wav"),
+               ("beat2", "beat2.wav"),
+               ("saucer_small", "saucer_small.wav"),
+               ("saucer_large", "saucer_large.wav"),
+               ("extra_ship", "extra_ship.wav")]
 
 SAUCER_POLYGON = [(-1.25, 0.25), (-0.5, 0.75), (0.5, 0.75), (1.25, 0.25), (0.5, -0.25), (0.25, -0.75), (-0.25, -0.75), (-0.5, -0.25), (-1.25, 0.25), (1.25, 0.25), (0.5, -0.25), (-0.5, -0.25)] 
 SAUCER_RADIUS_SIZES = (15, 25)
