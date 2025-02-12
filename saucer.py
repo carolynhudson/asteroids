@@ -16,6 +16,7 @@ class Saucer(CircleShape):
         self.gun_cooldown = SAUCER_INITIAL_SHOOT_COOLDOWN
         self.player_group = player_group
         self.hurts_player = True
+        self.turn_cooldown = SAUCER_CHANGE_DIR_COOLDOWN
 
         # make the randomized asteroid polygon from 10 to 15 vector points degrees is the base spacing +/- between 0.49 of degrees and the distance from the center 0.8 to 1.1 times the radius.
         self.shape = Polygon(SAUCER_POLYGON, radius)
@@ -51,6 +52,12 @@ class Saucer(CircleShape):
             self.gun_cooldown -= dt
         elif len(self.player_group) > 0 and random.uniform(0.0, 100.0) <= SAUCER_SHOT_CHANCE:
             self.shoot()
+
+        if self.turn_cooldown > 0:
+            self.turn_cooldown -= dt
+        elif random.uniform(0.0, 100.0) <= SAUCER_SHOT_CHANCE:
+            self.velocity = self.velocity.rotate(random.uniform(-SAUCER_DIR_CHANGE_VARIANCE, SAUCER_DIR_CHANGE_VARIANCE))
+            self.turn_cooldown = SAUCER_CHANGE_DIR_COOLDOWN
 
         # Update asteroid position and rotation
         self.position += self.velocity * dt
