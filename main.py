@@ -7,6 +7,7 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from particle import Particle
 from vectortext import VectorText
+from saucer import Saucer
 
 def main():
     print("Starting asteroids!")
@@ -28,13 +29,18 @@ def main():
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
     particles = pygame.sprite.Group()
+    saucers = pygame.sprite.Group()
+    destroyable = pygame.sprite.Group()
+    collidable = pygame.sprite.Group()
+    players = pygame.sprite.Group()
 
-    Player.containers = (updatable, drawable)
-    Asteroid.containers = (updatable, drawable, asteroids)
+    Player.containers = (updatable, drawable, players)
+    Asteroid.containers = (updatable, drawable, asteroids, destroyable, collidable)
     AsteroidField.containers = (updatable)
-    Shot.containers = (updatable, drawable, shots)
+    Shot.containers = (updatable, drawable, shots, collidable)
     Particle.containers = (updatable, drawable, particles)
     VectorText.containers = (updatable, drawable)
+    Saucer.containers = (updatable, drawable, saucers, destroyable, collidable)    
 
     score_text = VectorText(30, 30, f"SCORE {score}", 7, pygame.Color(200, 220, 255, 180))
     # The ^ symbol is the player ship sprite in the vector library.
@@ -44,7 +50,7 @@ def main():
     respawn = False
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    asteroid_field = AsteroidField()
+    asteroid_field = AsteroidField(asteroids, players, saucers)
 
     while True:
         for event in pygame.event.get():
@@ -56,33 +62,27 @@ def main():
         # Check if the player died and is waiting for respawn (particles to fade out) if not check for collisions
         if not respawn:
             # Was player hit by a asteroid
-            if any([a.touching(player) for a in asteroids]):
+            if any([(o.touching(player) and o.hurts_player) for o in collidable]):
                 lives -= 1
                 lives_text.update_text("^" * lives)
                 for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
                     Particle(player.position.x,player.position.y, random.uniform(2.0, 10.0))
                 player.kill()
-                asteroid_field.kill()
-                for sprite in asteroids:
-                    sprite.kill()
-                for sprite in shots:
+                asteroid_field.remaning_spawn_mass = -1
+                for sprite in collidable:
                     sprite.kill()
                 respawn = True
 
             # Iterate through every asteroid and shot to see if any shots have hit an asteroid 
-            shot_asteroid = False
-            for hit_a, hit_s in [(a, s) for a in asteroids for s in shots if a.touching(s)]:
-                # Generate a spray of temporary particles
-                for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
-                    Particle(hit_a.position.x,hit_a.position.y)
-
-                # Perform split and add asteroid value to the score 
-                score += hit_a.split(hit_s.velocity)
-                shot_asteroid = True
-                hit_s.kill()
+            shot_something = False
+            for hit_object, shot in [(o, s) for o in destroyable for s in shots if not s.hurts_player and o.touching(s)]:
+                # Call got_shot method to handle scoring and other effects 
+                score += hit_object.got_shot(shot.velocity)
+                shot_something = True
+                shot.kill() 
 
             # Update score on hit
-            if shot_asteroid:
+            if shot_something:
                 score_text.update_text(f"SCORE {score}") 
                 if score >= next_life:
                     next_life += PLAYER_EXTRA_LIFE
@@ -107,7 +107,7 @@ def main():
                 print(f"Your final score was: {score}")
                 return
             player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-            asteroid_field = AsteroidField()
+            asteroid_field.remaning_spawn_mass = asteroid_field.wave_mass_limit
             respawn = False
 
         pygame.display.flip()

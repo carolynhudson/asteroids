@@ -4,16 +4,19 @@ import math
 from constants import *
 from circleshape import *
 from randompolygon import RandomPolygon
+from particle import Particle
 
 class Asteroid(CircleShape):
+
     def __init__(self, x, y, radius):
         super().__init__(x, y, radius)
 
-        self.mass = math.pi * self.radius * self.radius * random.uniform(0.4, 1.0)
+        self.mass = math.pi * self.radius ** 3.0 * random.uniform(*ASTEROID_MASS_VARIANCE)
 
         #randomize asteroid rotation rate
         self.rotation = 0
         self.rotation_rate = random.uniform(-30,30)
+        self.hurts_player = True
 
         # make the randomized asteroid polygon from 10 to 15 vector points degrees is the base spacing +/- between 0.49 of degrees and the distance from the center 0.8 to 1.1 times the radius.
         self.shape = RandomPolygon(10, 15, self.radius * 0.8, self.radius * 1.1)
@@ -24,8 +27,8 @@ class Asteroid(CircleShape):
 
         # Drawn the polygon
         pygame.draw.polygon(screen, pygame.Color(200, 200, 200), rockpoly, 2)
-        return super().draw(screen)
-    
+        return super().draw(screen, ASTEROID_SHOW_HITBOX)
+     
     def update(self, dt):
         # Update asteroid position and rotation
         self.position += self.velocity * dt
@@ -36,7 +39,14 @@ class Asteroid(CircleShape):
         self.position.y = ((self.position.y + ASTEROID_MAX_RADIUS + BOUNDRY_HEIGHT * 2) % BOUNDRY_HEIGHT) - ASTEROID_MAX_RADIUS
         return super().update(dt)
     
-    def split(self, shot_velocity: pygame.Vector2):
+    def __calc_splitting_velocity(self, size, split_angle):
+        return  pygame.Vector2(0, random.uniform(*ASTEROID_SPLIT_V_RANGE) * ((4 - size // ASTEROID_MIN_RADIUS) / 2)).rotate(split_angle + random.uniform(-ASTEROID_SPLIT_A_VARIANCE, ASTEROID_SPLIT_A_VARIANCE))
+
+    def got_shot(self, shot_velocity: pygame.Vector2):
+        # Generate a spray of temporary particles
+        for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
+            Particle(self.position.x, self.position.y)
+
         self.kill()
         if self.radius > ASTEROID_MIN_RADIUS:
             # Determine shot travel angle
@@ -54,16 +64,15 @@ class Asteroid(CircleShape):
             
 
             # Set new asteroid velocities based on the former asteroid's velocity
-            split_angle =  random.uniform(20, 50)
-            v_mult = (4 - new_size // ASTEROID_MIN_RADIUS) / 2
-            first_rock.velocity = self.velocity + pygame.Vector2(0,random.uniform(30.0, 60.0) * v_mult).rotate(split_root_angle + random.uniform(-10.0, 10.0))
-            second_rock.velocity = self.velocity - pygame.Vector2(0,random.uniform(30.0, 60.0) * v_mult).rotate(split_root_angle + random.uniform(-10.0, 10.0))
-        return ASTEROID_MAX_RADIUS - self.radius + ASTEROID_MIN_RADIUS
+            first_rock.velocity = self.velocity + self.__calc_splitting_velocity(new_size, split_root_angle)
+            second_rock.velocity = self.velocity - self.__calc_splitting_velocity(new_size, split_root_angle)
+
+        return ASTEROID_MAX_RADIUS - self.radius + ASTEROID_MIN_RADIUS # Return score for hitting an asteroid
     
     def collide(self, other: CircleShape):
         #Compute new velocities for both objects
-        self.velocity = (self.velocity - (2 * other.mass / (self.mass + other.mass)) * pygame.math.Vector2.project((self.velocity - other.velocity), (self.position - other.position))) * random.uniform(0.85, 0.99)
-        other.velocity = (other.velocity - (2 * self.mass / (self.mass + other.mass)) * pygame.math.Vector2.project((other.velocity - self.velocity), (other.position - self.position))) * random.uniform(0.85, 0.99)
+        self.velocity = (self.velocity - (2 * other.mass / (self.mass + other.mass)) * pygame.math.Vector2.project((self.velocity - other.velocity), (self.position - other.position))) * random.uniform(*ASTEROID_COLLISION_V_LOSS_RANGE)
+        other.velocity = (other.velocity - (2 * self.mass / (self.mass + other.mass)) * pygame.math.Vector2.project((other.velocity - self.velocity), (other.position - self.position))) * random.uniform(*ASTEROID_COLLISION_V_LOSS_RANGE)
 
         #Check if objects are "inside" each other and reposition them outside with a little saftey margin along the line formed between their centers.
         distance = self.position.distance_to(other.position)

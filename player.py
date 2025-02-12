@@ -8,9 +8,10 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.gun_cooldown = 0
-        self.ship_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in PLAYER_SHIP_POLYGON]
-        self.thrust_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS for x,y in PLAYER_THRUST_POLYGON]
+        self.ship_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS * 1.2 for x,y in PLAYER_SHIP_POLYGON]
+        self.thrust_poly = [pygame.Vector2(x,y) * PLAYER_RADIUS * 1.2 for x,y in PLAYER_THRUST_POLYGON]
         self.moved = False
+        self.rotational_velocity = 0
         #self.gun_sound = pygame.mixer.Sound(file=SOUND_GUN)
         #self.thrust_sound = pygame.mixer.Sound(file=SOUND_THRUST)
         
@@ -35,15 +36,15 @@ class Player(CircleShape):
         if self.moved:
             pygame.draw.polygon(screen,pygame.Color(255, 127, 16), self.translate_thrust(), 2)
 
-        return super().draw(screen)
+        return super().draw(screen, PLAYER_SHOW_HITBOX)
     
     def rotate(self, dt):
-        self.rotation += PLAYER_TURN_SPEED * dt
+        self.rotational_velocity += PLAYER_TURN_SPEED * dt
     
     def move(self, dt):
         #self.thrust_sound.play()
         self.moved = True
-        self.velocity += pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_ACCELERATION * dt
+        self.velocity += pygame.Vector2(0, 1).rotate(self.rotation) * (PLAYER_ACCELERATION if dt > 0 else PLAYER_ACCELERATION / 2) * dt 
         self.velocity = self.velocity.clamp_magnitude(PLAYER_SPEED)
         
 
@@ -65,7 +66,9 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE] and self.gun_cooldown <= 0:
             self.shoot()
         
-        self.velocity *= 0.995
+        self.velocity *= PLAYER_VELOCITY_DECAY
+        self.rotational_velocity *= PLAYER_ROTATION_DECAY
+        self.rotation += self.rotational_velocity * dt
         self.position += self.velocity * dt
         self.position.x = (self.position.x + SCREEN_WIDTH * 4) % SCREEN_WIDTH
         self.position.y = (self.position.y + SCREEN_HEIGHT * 4) % SCREEN_HEIGHT
@@ -74,7 +77,7 @@ class Player(CircleShape):
     
     def shoot(self):
         self.gun_cooldown = PLAYER_SHOOT_COOLDOWN
-        new_shot = Shot(self.position.x, self.position.y)
-        new_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        new_shot = Shot(self.position, self.radius, self.rotation, False)
+        new_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
         #self.gun_sound.play()
         

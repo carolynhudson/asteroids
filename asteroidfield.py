@@ -2,7 +2,7 @@ import pygame
 import random
 from asteroid import Asteroid
 from constants import *
-
+from saucer import Saucer
 
 class AsteroidField(pygame.sprite.Sprite):
     edges = [
@@ -28,24 +28,48 @@ class AsteroidField(pygame.sprite.Sprite):
         ],
     ]
 
-    def __init__(self):
+    def __init__(self, asteroids_group, player_group, saucers_group):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.spawn_timer = 0.0
+        self.wave_mass_limit = ASTEROID_STARTING_WAVE_MASS
+        self.remaning_spawn_mass = ASTEROID_STARTING_WAVE_MASS
+        self.asteroids_group = asteroids_group
+        self.player_group = player_group
+        self.saucers_group = saucers_group
 
     def spawn(self, radius, position, velocity):
         asteroid = Asteroid(position.x, position.y, radius)
         asteroid.velocity = velocity
+
+    def spawn_saucer(self, radius, position, velocity):
+        saucer = Saucer(position.x, position.y, radius, self.player_group)
+        saucer.velocity = velocity
 
     def update(self, dt):
         self.spawn_timer += dt
         if self.spawn_timer > ASTEROID_SPAWN_RATE:
             self.spawn_timer = 0
 
-            # spawn a new asteroid at a random edge
-            edge = random.choice(self.edges)
-            speed = random.randint(40, 100)
-            velocity = edge[0] * speed
-            velocity = velocity.rotate(random.randint(-30, 30))
-            position = edge[1](random.uniform(0, 1))
-            kind = random.randint(1, ASTEROID_KINDS)
-            self.spawn(ASTEROID_MIN_RADIUS * kind, position, velocity)
+            if self.remaning_spawn_mass <= 0 and len(self.asteroids_group) == 0:
+                self.wave_mass_limit += ASTEROID_WAVE_MASS_INCREASE
+                self.remaning_spawn_mass = self.wave_mass_limit
+
+            if random.uniform(0.0, 100.0) > SAUCER_SPAWN_CHANCE:
+                # spawn a new asteroid at a random edge
+                if self.remaning_spawn_mass > 0:
+                    edge = random.choice(self.edges)
+                    speed = random.randint(40, 100)
+                    velocity = edge[0] * speed
+                    velocity = velocity.rotate(random.randint(-30, 30))
+                    position = edge[1](random.uniform(0, 1))
+                    kind = random.randint(1, ASTEROID_KINDS)
+                    self.remaning_spawn_mass -= ASTEROID_MIN_RADIUS * kind
+                    self.spawn(ASTEROID_MIN_RADIUS * kind, position, velocity)
+            elif len(self.saucers_group) == 0:
+                # Spawn a flying saucer at a random edge
+                edge = random.choice(self.edges)
+                speed = random.randint(100, 200)
+                velocity = edge[0] * speed
+                velocity = velocity.rotate(random.randint(-30, 30))
+                position = edge[1](random.uniform(0, 1))
+                self.spawn_saucer(random.choice(SAUCER_RADIUS_SIZES), position, velocity)
