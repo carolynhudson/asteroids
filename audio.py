@@ -18,7 +18,9 @@ class Audio(pygame.sprite.Sprite):
         self.beats = None
         self.thrust_playing = False
         self.saucer_playing = False
-    
+        self.bangs = None
+        self.shot_sound = None
+        self.extra_life_sound = None
 
         if USE_AUDIO:
             try:
@@ -43,8 +45,14 @@ class Audio(pygame.sprite.Sprite):
                 self.__saucer_channel = pygame.mixer.Channel(1)
                 self.__beat_channel = pygame.mixer.Channel(3)
                 self.thrust_sound = self.__sounds.get("thrust", None)
-                self.saucer_sounds = (self.__sounds.get("saucer_small", self.__sounds.get("saucer_big", None)), self.__sounds.get("saucer_big", self.__sounds.get("saucer_small", None)))
+                self.saucer_sounds = (self.__sounds.get("saucer_small", self.__sounds.get("saucer_big", None)), 
+                                      self.__sounds.get("saucer_big", self.__sounds.get("saucer_small", None)))
                 self.beats = (self.__sounds.get("beat1", self.__sounds.get("beat2", None)), self.__sounds.get("beat2", self.__sounds.get("beat1", None)))
+                self.bangs = (self.__sounds.get("bang_small", self.__sounds.get("bang_medium", self.__sounds.get("bang_large", None))),
+                              self.__sounds.get("bang_medium", self.__sounds.get("bang_small", self.__sounds.get("bang_large", None))),
+                              self.__sounds.get("bang_large", self.__sounds.get("bang_medium", self.__sounds.get("bang_small", None))))
+                self.shot_sound = self.__sounds.get("shoot", None)
+                self.extra_life_sound = self.__sounds.get("extra_ship", None)
     
     def start_thrust(self):
         if self.__audio_enabled and self.thrust_sound is not None:
@@ -74,6 +82,25 @@ class Audio(pygame.sprite.Sprite):
     def play_sound(self, sound_name: str):
         if self.__audio_enabled:
             sound = self.__sounds.get(sound_name, None)
+            channel = pygame.mixer.find_channel()
+            if sound is not None and channel is not None:
+                channel.play(sound)
+
+    def shoot(self):
+        if self.__audio_enabled:
+            channel = pygame.mixer.find_channel()
+            if self.shot_sound is not None and channel is not None:
+                channel.play(self.shot_sound)
+
+    def extra_life(self):
+        if self.__audio_enabled:
+            channel = pygame.mixer.find_channel()
+            if self.extra_life_sound is not None and channel is not None:
+                channel.play(self.extra_life_sound)
+
+    def bang(self, size: int):
+        if self.__audio_enabled and self.bangs is not None:
+            sound = self.bangs[size]
             channel = pygame.mixer.find_channel()
             if sound is not None and channel is not None:
                 channel.play(sound)

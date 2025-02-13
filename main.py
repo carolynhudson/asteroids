@@ -70,7 +70,7 @@ def main():
                 for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
                     Particle(player.position.x,player.position.y, random.uniform(2.0, 10.0))
 
-                audio.play_sound("bang_large")
+                audio.bang(2)
                 player.kill()
                 asteroid_field.remaning_spawn_mass = -1
                 for sprite in collidable:
@@ -92,7 +92,7 @@ def main():
                     next_life += PLAYER_EXTRA_LIFE
                     lives += 1
                     lives_text.update_text("^" * lives)
-                    audio.play_sound("extra_ship")
+                    audio.extra_life()
 
             a_list = list(asteroids)
             for asteroid_1, asteroid_2 in [(a_list[a1], a_list[a2]) for a1 in range(len(asteroids) - 1) for a2 in range(a1 + 1, len(asteroids)) if a_list[a1].touching(a_list[a2])]:

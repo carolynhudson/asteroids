@@ -34,7 +34,7 @@ class Saucer(CircleShape):
             angle_to_player = ((player.position + player.velocity * (player_distance / SAUCER_SHOT_SPEED)) - self.position).as_polar()[1] + random.uniform(-SAUCER_SHOT_ANGLE_VARIANCE, SAUCER_SHOT_ANGLE_VARIANCE)
             new_shot = Shot(self.position, self.radius, angle_to_player, True)            
             new_shot.velocity = pygame.Vector2(1, 0).rotate(angle_to_player) * SAUCER_SHOT_SPEED #
-            self.audio.play_sound("shoot")
+            self.audio.shoot()
 
     def got_shot(self, shot_velocity: pygame.Vector2):
         # Generate a spray of temporary particles

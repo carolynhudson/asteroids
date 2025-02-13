@@ -83,7 +83,7 @@ class Player(CircleShape):
         self.gun_cooldown = PLAYER_SHOOT_COOLDOWN
         new_shot = Shot(self.position, self.radius, self.rotation, False)
         new_shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
-        self.audio.play_sound("shoot")
+        self.audio.shoot()
 
     def kill(self):
         if self.audio.thrust_playing:
