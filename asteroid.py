@@ -5,6 +5,7 @@ from constants import *
 from circleshape import *
 from randompolygon import RandomPolygon
 from particle import Particle
+from audio import Audio
 
 class Asteroid(CircleShape):
 
@@ -12,6 +13,7 @@ class Asteroid(CircleShape):
         super().__init__(x, y, radius)
 
         self.mass = math.pi * self.radius ** 3.0 * random.uniform(*ASTEROID_MASS_VARIANCE)
+        self.audio = Audio()
 
         #randomize asteroid rotation rate
         self.rotation = 0
@@ -46,7 +48,8 @@ class Asteroid(CircleShape):
         # Generate a spray of temporary particles
         for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
             Particle(self.position.x, self.position.y)
-
+        
+        self.audio.bang(size // ASTEROID_MIN_RADIUS - 1)
         self.kill()
         if self.radius > ASTEROID_MIN_RADIUS:
             # Determine shot travel angle
