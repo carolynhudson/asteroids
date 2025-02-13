@@ -104,3 +104,8 @@ class Audio(pygame.sprite.Sprite):
             channel = pygame.mixer.find_channel()
             if sound is not None and channel is not None:
                 channel.play(sound)
+
+    def stop_all(self):
+        if self.__audio_enabled:
+            for channel in [pygame.mixer.Channel(c) for c in range(pygame.mixer.get_num_channels()) if pygame.mixer.Channel(c).get_busy()]:
+                channel.stop()

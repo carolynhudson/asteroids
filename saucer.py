@@ -42,6 +42,7 @@ class Saucer(CircleShape):
             Particle(self.position.x, self.position.y, random.uniform(2.0, 10.0))
 
         self.audio.bang(0 if self.radius == min(SAUCER_RADIUS_SIZES) else 1)
+        self.audio.stop_saucer()
         self.kill()
         return 1000 if self.radius == min(SAUCER_RADIUS_SIZES) else 500
 
