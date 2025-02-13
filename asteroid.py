@@ -49,7 +49,7 @@ class Asteroid(CircleShape):
         for i in range(random.randrange(*PARTICLE_COUNT_RANGE)):
             Particle(self.position.x, self.position.y)
         
-        self.audio.bang(size // ASTEROID_MIN_RADIUS - 1)
+        self.audio.bang(self.radius // ASTEROID_MIN_RADIUS - 1)
         self.kill()
         if self.radius > ASTEROID_MIN_RADIUS:
             # Determine shot travel angle
