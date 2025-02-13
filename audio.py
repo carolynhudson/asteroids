@@ -47,11 +47,12 @@ class Audio(pygame.sprite.Sprite):
 
                 self.__thrust_channel = pygame.mixer.Channel(0)
                 self.__saucer_channel = pygame.mixer.Channel(1)
-                self.__beat_channel = pygame.mixer.Channel(3)
+                self.__beat_channel = pygame.mixer.Channel(2)
                 self.thrust_sound = self.__sounds.get("thrust", None)
                 self.saucer_sounds = (self.__sounds.get("saucer_small", self.__sounds.get("saucer_big", None)), 
                                       self.__sounds.get("saucer_big", self.__sounds.get("saucer_small", None)))
-                self.beats = (self.__sounds.get("beat1", self.__sounds.get("beat2", None)), self.__sounds.get("beat2", self.__sounds.get("beat1", None)))
+                self.beats = (self.__sounds.get("beat1", self.__sounds.get("beat2", None)), 
+                              self.__sounds.get("beat2", self.__sounds.get("beat1", None)))
                 self.bangs = (self.__sounds.get("bang_small", self.__sounds.get("bang_medium", self.__sounds.get("bang_large", None))),
                               self.__sounds.get("bang_medium", self.__sounds.get("bang_small", self.__sounds.get("bang_large", None))),
                               self.__sounds.get("bang_large", self.__sounds.get("bang_medium", self.__sounds.get("bang_small", None))))
@@ -66,7 +67,7 @@ class Audio(pygame.sprite.Sprite):
 
     def stop_thrust(self):
         if self.__audio_enabled and self.thrust_sound is not None:
-            if self.__thrust_channel.get_busy():
+            if self.__thrust_channel.get_busy() or self.thrust_playing:
                 self.__thrust_channel.stop()
                 self.thrust_playing = False
 
@@ -79,7 +80,7 @@ class Audio(pygame.sprite.Sprite):
 
     def stop_saucer(self):
         if self.__audio_enabled and self.saucer_sounds is not None:
-            if self.__saucer_channel.get_busy():
+            if self.__saucer_channel.get_busy() or self.saucer_playing:
                 self.__saucer_channel.stop()
                 self.saucer_playing = False
 
