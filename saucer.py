@@ -25,6 +25,8 @@ class Saucer(CircleShape):
         self.shape = Polygon(SAUCER_POLYGON, radius)
         if not self.audio.saucer_playing:
             self.audio.start_saucer(radius == min(SAUCER_RADIUS_SIZES))
+        
+        self.audio.fast_beat()
              
     def shoot(self):
         player = random.choice(list(self.player_group))
@@ -43,6 +45,7 @@ class Saucer(CircleShape):
 
         self.audio.bang(0 if self.radius == min(SAUCER_RADIUS_SIZES) else 1)
         self.audio.stop_saucer()
+        self.audio.slow_beat()
         self.kill()
         return 1000 if self.radius == min(SAUCER_RADIUS_SIZES) else 500
 

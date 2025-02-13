@@ -21,10 +21,14 @@ class Audio(pygame.sprite.Sprite):
         self.bangs = None
         self.shot_sound = None
         self.extra_life_sound = None
+        self.beat_time = 0
+        self.beat_timeout = SOUND_SLOW_BEAT_TIME
+        self.beat_index = 0
+        self.run_beat = False
 
         if USE_AUDIO:
             try:
-                pygame.mixer.init(channels=16)
+                pygame.mixer.init(channels=SOUND_CHANNELS)
                 self.__audio_enabled = True
                     
             except Exception as e:
@@ -109,3 +113,36 @@ class Audio(pygame.sprite.Sprite):
         if self.__audio_enabled:
             for channel in [pygame.mixer.Channel(c) for c in range(pygame.mixer.get_num_channels()) if pygame.mixer.Channel(c).get_busy()]:
                 channel.stop()
+
+    def update(self, dt):
+        if self.__audio_enabled and self.run_beat:
+
+            self.beat_time += dt
+
+            if self.beat_time >= self.beat_timeout:
+                self.beat_time = 0
+                self.__beat_channel.play(self.beats[self.beat_index])
+                self.beat_index = (self.beat_index + 1) % 2
+            
+        return super().update(dt)
+    
+    def fast_beat(self):
+        self.beat_timeout = SOUND_FAST_BEAT_TIME
+
+    def slow_beat(self):
+        self.beat_timeout = SOUND_SLOW_BEAT_TIME
+    
+    def pause_beat(self):
+        self.run_beat = False
+        self.beat_time = 0
+        self.beat_index = 0
+
+    def start_beat(self):
+        if self.__audio_enabled and not self.run_beat:
+            self.run_beat = True
+            self.beat_time = 0
+            self.beat_index = 0
+            self.beat_timeout = SOUND_SLOW_BEAT_TIME
+
+
+    

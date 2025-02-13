@@ -41,6 +41,7 @@ BOUNDRY_WIDTH = SCREEN_WIDTH + ASTEROID_MAX_RADIUS * 2
 BOUNDRY_HEIGHT = SCREEN_HEIGHT + ASTEROID_MAX_RADIUS * 2
 
 USE_AUDIO = True
+SOUND_CHANNELS = 16
 SOUND_FILES_PATH = "./sounds/"
 SOUND_FILES = [("shoot", "fire.wav"), 
                ("thrust", "thrust.wav"), 
@@ -52,6 +53,8 @@ SOUND_FILES = [("shoot", "fire.wav"),
                ("saucer_small", "saucer_small.wav"),
                ("saucer_large", "saucer_large.wav"),
                ("extra_ship", "extra_ship.wav")]
+SOUND_SLOW_BEAT_TIME = 2.0
+SOUND_FAST_BEAT_TIME = 1.0
 
 SAUCER_POLYGON = [(-1.25, 0.25), (-0.5, 0.75), (0.5, 0.75), (1.25, 0.25), (0.5, -0.25), (0.25, -0.75), (-0.25, -0.75), (-0.5, -0.25), (-1.25, 0.25), (1.25, 0.25), (0.5, -0.25), (-0.5, -0.25)] 
 SAUCER_RADIUS_SIZES = (15, 25)

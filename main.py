@@ -41,7 +41,8 @@ def main():
     Shot.containers = (updatable, drawable, shots, collidable)
     Particle.containers = (updatable, drawable, particles)
     VectorText.containers = (updatable, drawable)
-    Saucer.containers = (updatable, drawable, saucers, destroyable, collidable)    
+    Saucer.containers = (updatable, drawable, saucers, destroyable, collidable) 
+    Audio.containers = (updatable)   
 
     score_text = VectorText(30, 30, f"SCORE {score}", 7, pygame.Color(200, 220, 255, 180))
     # The ^ symbol is the player ship sprite in the vector library.
@@ -52,6 +53,7 @@ def main():
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField(asteroids, players, saucers)
+    audio.start_beat()
 
     while True:
         for event in pygame.event.get():
@@ -72,6 +74,7 @@ def main():
 
                 audio.bang(2)
                 player.kill()
+                audio.pause_beat()
                 asteroid_field.remaning_spawn_mass = -1
                 for sprite in collidable:
                     sprite.kill()
@@ -111,6 +114,9 @@ def main():
                 print("Game Over!")
                 print(f"Your final score was: {score}")
                 return
+            
+            audio.stop_all()
+            audio.start_beat()
             player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
             asteroid_field.remaning_spawn_mass = asteroid_field.wave_mass_limit
             respawn = False
